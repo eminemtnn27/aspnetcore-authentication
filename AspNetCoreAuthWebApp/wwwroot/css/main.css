@@ -14,7 +14,7 @@ body {
 }
 
 @grey:#2a2a2a;
-@blue:#1fb5bf;
+@green:#6fbf1f;
 
 .log-form {
     width: 40%;
@@ -88,8 +88,8 @@ input {
 
 .btn {
     display: inline-block;
-    background: @blue;
-    border: 1px solid darken(@blue, 5%);
+    background: @green;
+    border: 1px solid darken(@green, 5%);
     padding: .5em 2em;
     color: white;
     margin-right: .5em;
@@ -97,11 +97,11 @@ input {
     &:hover
 
 {
-    background: lighten(@blue, 5%);
+    background: lighten(@green, 5%);
 }
 
 &:active {
-    background: @blue;
+    background: @green;
     box-shadow: inset 0px 1px 1px fadeout(black, 90%);
 }
 
@@ -112,7 +112,7 @@ input {
 }
 
 .forgot {
-    color: lighten(@blue, 10%);
+    color: lighten(@green, 10%);
     line-height: .5em;
     position: relative;
     top: 2.5em;
@@ -124,11 +124,7 @@ input {
     &:hover
 
 {
-    color: darken(@blue, 5%);
+    color:  (@green, 5%);
 }
-
-&:active {
-}
-
-}
-}
+ 
+ 
