@@ -1,7 +1,7 @@
-﻿using AspNetCoreAuthWebApp.Helper;
-using AspNetCoreAuthWebApp.Models;
+﻿using AspNetCoreAuthWebApp.Models;
 using AspNetCoreAuthWebApp.Repositories;
 using AspNetCoreAuthWebApp.Services;
+using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +11,7 @@ namespace AspNetCoreAuthWebApp.Controllers
 {
     public class HomeController : Controller
     {
+        public IToastifyService _notifyService { get; }
         private readonly ILoginRepository _login;
         private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
@@ -18,11 +19,12 @@ namespace AspNetCoreAuthWebApp.Controllers
         {
             return _login.GetUser(login);
         }
-        public HomeController(ILoginRepository login, IConfiguration configuration, ITokenService tokenService)
+        public HomeController(ILoginRepository login, IConfiguration configuration, ITokenService tokenService, IToastifyService notifyService)
         {
             _login = login;
             _configuration =configuration;
             _tokenService = tokenService;
+            _notifyService = notifyService;
         }
         public IActionResult Index()
         {
@@ -30,7 +32,7 @@ namespace AspNetCoreAuthWebApp.Controllers
         }
 
         [AllowAnonymous]
-        [Route("login")]
+        [Route("Login")]
         [HttpPost]
         public IActionResult Login(Login login)
         {
@@ -39,7 +41,6 @@ namespace AspNetCoreAuthWebApp.Controllers
                 return (RedirectToAction("Error"));
             }
 
-            IActionResult response = Unauthorized();
             var validUser = GetUser(login);
 
             if (validUser != null)
@@ -50,23 +51,44 @@ namespace AspNetCoreAuthWebApp.Controllers
                 if (generatedToken != null)
                 {
                     HttpContext.Session.SetString("Token", generatedToken);
-                    return RedirectToAction("Home");
+                    _notifyService.Success("Giriş Başarılı");
+                    return RedirectToAction("Login");
                 }
                 else
                 {
-                    return (RedirectToAction("Error"));
+                    return (RedirectToAction("Index"));
                 }
             }
             else
             {
-                return (RedirectToAction("Error"));
+                _notifyService.Error("Giriş Başarısız.Bilgilerin doğruluğundan emin olunuz.");
+                return (RedirectToAction("Index"));
             }
             
         }
+        [Authorize]
+        [Route("Login")]
+        [HttpGet]
+        public IActionResult Page()
+        {
+            string token = HttpContext.Session.GetString("Token");
 
+            if (token == null)
+            {
+                return (RedirectToAction("Index"));
+            }
+
+            if (!_tokenService.IsTokenValid(_configuration["Jwt:Key"].ToString(),
+                _configuration["Jwt:Issuer"].ToString(), token))
+            {
+                return (RedirectToAction("Index"));
+            }
+             
+            return View();
+        }
         public IActionResult Error()
         {
-            ViewBag.Message = "Bir hata oluştu...";
+            ViewBag.Message = "Bir hata oluştu.Tekrar deneyiniz...";
             return View();
         }
     }

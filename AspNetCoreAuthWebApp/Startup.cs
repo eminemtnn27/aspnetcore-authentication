@@ -1,5 +1,6 @@
 using AspNetCoreAuthWebApp.Repositories;
 using AspNetCoreAuthWebApp.Services;
+using AspNetCoreHero.ToastNotification;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -29,7 +30,8 @@ namespace AspNetCoreAuthWebApp
 
             services.AddAuthentication(auth =>
             {
-                auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; 
+                auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(options =>
             {
@@ -44,6 +46,7 @@ namespace AspNetCoreAuthWebApp
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
                 };
             });
+            services.AddToastify(config => { config.DurationInSeconds = 1000; config.Position = Position.Right; config.Gravity = Gravity.Top; });
         }
          
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
